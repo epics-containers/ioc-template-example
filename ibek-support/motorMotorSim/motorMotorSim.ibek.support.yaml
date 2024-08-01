@@ -1,0 +1,121 @@
+# yaml-language-server: $schema=https://github.com/epics-containers/ibek/releases/download/2.0.2/ibek.support.schema.json
+
+module: motorSim
+
+entity_models:
+  - name: simMotorController
+    description: |-
+      Creates a simulation motion controller
+    parameters:
+      controllerName:
+        type: id
+        description: |-
+          The name of the controller and its Asyn Port Name
+
+      P:
+        type: str
+        description: |-
+          Device PV Prefix
+
+      numAxes:
+        type: int
+        description: |-
+          The number of axes to create
+
+    pre_init:
+      - value: |
+          # motorSimCreateController(controller_asyn_port_name, axis_count)
+          motorSimCreateController({{controllerName}}, {{numAxes}})
+
+  - name: simMotorAxis
+    description: |-
+      Creates a simulation motor axis
+    parameters:
+      controller:
+        type: object
+        description: |-
+          a reference to the motion controller
+
+      M:
+        type: str
+        description: |-
+          PV suffix for the motor record
+
+      ADDR:
+        type: int
+        description: |-
+          The axis number (allowed to be from 0 to controller.numAxes-1)
+
+      DESC:
+        type: str
+        description: |-
+          The description of the axis
+
+      DLLM:
+        type: int
+        description: |-
+          The low limit of the axis (in counts)
+        default: -20000
+
+      DHLM:
+        type: int
+        description: |-
+          The high limit of the axis (in counts)
+        default: 20000
+
+      home:
+        type: int
+        description: |-
+          The home position of the axis (in counts)
+
+      start:
+        type: int
+        description: |-
+          The starting position of the axis (in counts)
+        default: 0
+
+      DIR:
+        type: enum
+        description: |-
+          The direction of the axis
+        default: 0
+        values:
+          Pos: 0
+          Neg: 1
+
+    pre_init:
+      - when: once # TODO this feature is broken as the comment is printed for all axes
+        value: |
+          # motorSimCreateAxis(controller_asyn_port_name, axis, axis_description)
+
+      - value: |
+          motorSimConfigAxis({{controller}}, {{ADDR}}, {{DHLM}}, {{DLLM}}, {{home}}, {{start}})
+
+    databases:
+      # TODO as this is a simulation I have hard coded some of the DB fields,
+      # but these could easily be made into arguments above
+      #
+      # Note: supplying no value means that the argument of the same name is used
+      # (the most common case - if you contrive to make args and db fields the same.
+      # Which is  good idea for ease of transition from traditional IOCs)
+      - file: basic_asyn_motor.db
+        args:
+          P: '{{controller.P}}'
+          M:
+          DTYP: asynMotor
+          PORT: '{{controller}}'
+          ADDR:
+          DESC:
+          EGU: degrees
+          DIR:
+          VELO: '1'
+          VBAS: '.1'
+          ACCL: '.2'
+          BDST: '0'
+          BVEL: '1'
+          BACC: '.2'
+          MRES: '.01'
+          PREC: '5'
+          DHLM:
+          DLLM:
+          INIT: ''

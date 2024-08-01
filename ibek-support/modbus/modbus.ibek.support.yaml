@@ -1,0 +1,270 @@
+# yaml-language-server: $schema=https://github.com/epics-containers/ibek/releases/download/2.0.2/ibek.support.schema.json
+
+module: modbus
+
+entity_models:
+  - name: modbusPortConfigure
+    description: |-
+      This will create an AsynPort connecting to a Modbus TCP
+    parameters:
+      ASYNPORT:
+        type: id
+        description: |-
+          MODBUS TCP ASYNPORT on address <IP> port <TCPPORT>
+
+      IP:
+        type: str
+        description: |-
+          IP address of the Modbus
+        default: 127.0.0.1 ## localhost
+
+      TCPPORT:
+        type: int
+        description: |-
+          ASYN   MODBUS Port, Default : 502
+        default: 502
+
+      ASYNPRIO:
+        type: int
+        description: |-
+          ASYN   PRIORITY, Default : 0
+        default: 0
+
+      AUTOCONNECT:
+        type: int
+        description: |-
+          Asyn auto connect
+          0: Auto connection
+          1: no Auto connection
+        default: 0
+
+      NOPRECESSESOS:
+        type: int
+        description: |-
+          ASYN   noProcessEos, Default : 0
+          https://epics.anl.gov/tech-talk/2020/msg01705.php
+        default: 0
+
+      MODBUSLINK:
+        type: int
+        description: |-
+          MODBUS linktype, Default : 0
+          0 : TCP/IP
+          1 : RTU
+          2 : ASCII
+        default: 0
+
+      TIMEOUT:
+        type: int
+        description: |-
+          MODBUS timeout (ms), Default : 2000
+        default: 2000
+      WRITEDELAY:
+        type: int
+        description: |-
+          MODBUS write delay ms for Serial RTU, Default : 0
+        default: 0
+
+    pre_init:
+      - value: |
+          # Create Asyn Port (PortName, IPAddress, Username, Password, Priority, DisableAutoConnect, NOPRECESSESOS)
+          drvAsynIPPortConfigure("{{ASYNPORT}}", "{{IP}}:{{TCPPORT}}", {{ASYNPRIO}}, {{AUTOCONNECT}}, {{NOPRECESSESOS}})
+          modbusInterposeConfig("{{ASYNPORT}}",{{MODBUSLINK}},{{TIMEOUT}},{{WRITEDELAY}})
+
+  - name: modbusAsynConfigure
+    description: |-
+      This will create an AsynPort connecting to a Modbus TCP
+    parameters:
+      MODBUSPORT:
+        type: id
+        description: |-
+          MODBUS Port Name
+
+      ASYNPORT:
+        type: str
+        description: |-
+          ASYNPORT port Name of the Modbus
+
+      SERVER_ADDR:
+        type: int
+        description: |-
+          Server Address (Slave), for MODBUS TCP it is Unit ID Default : 1
+        default: 1
+
+      FUNC_CODE:
+        type: int
+        description: |-
+          Modbus function code 1,2,3,4,5,6,15,16, 123 for 23 RO, 223 for 23 WO
+        default: 4
+
+      STARTADDR:
+        type: int
+        description: |-
+          Start address 0-65535 decimal for relative addressing, -1 for absolute addressing
+        default: 0
+
+      DATA_LENGTH:
+        type: int
+        description: |-
+          The length of the Modbus data segment to be accessed.
+          1 : 16-bit registers R/W,
+          4 : 64-bit floats (4 16 bit),
+          100 : Int32 waveform record NELM = 100
+        default: 52
+
+      DATA_TYPE:
+        type: int
+        description: |-
+          Modbus register data types : 0,1,2,3,4,5,6,7,8,9,10,11,12
+          0 : UINT16 Unsigned 16-bit binary integers,
+          http://htmlpreview.github.io/?https://github.com/epics-modules/modbus/blob/master/documentation/modbusDoc.html
+        default: 7
+
+      POLL_DELAY:
+        type: int
+        description: |-
+          Read  function : Polling delay time in ms for the polling thread
+          Write function : a non-zero value means that the Modbus data should be read once
+        default: 1000
+
+      MODBUS_TYPE:
+        type: str
+        description: |-
+          Type of Modbus used in asynReprt
+        default: DefaultModbus
+
+    pre_init:
+      - value: |
+          # Create Modbus Port
+          drvModbusAsynConfigure("{{MODBUSPORT}}", "{{ASYNPORT}}", {{SERVER_ADDR}}, {{FUNC_CODE}}, {{STARTADDR}}, {{DATA_LENGTH}}, {{DATA_TYPE}}, {{POLL_DELAY}}, "{{MODBUS_TYPE}}")
+
+  ## modbusSensorTemplate
+  - name: modbusFloatReadout
+    description: |-
+      This will create floating point records
+    parameters:
+      P:
+        type: str
+        description: Device Prefix
+      R:
+        type: str
+        description: Device Suffix
+      PORT:
+        type: str
+        description: Port name for the detector
+      DESC:
+        type: str
+        description: |-
+          Readout description
+        default: Value
+      OFFSET:
+        type: int
+        description: |-
+          OFFSET register address
+      EGU:
+        type: str
+        description: |-
+          Engineering Units
+        default: None
+      HOPR:
+        type: float
+        description: |-
+          High Limit
+        default: 0.0
+      LOPR:
+        type: float
+        description: |-
+          Low Limit
+        default: 0.0
+      PREC:
+        type: int
+        description: |-
+          Precision
+        default: 0
+
+    databases:
+      - file: $(SUPPORT)/modbus/db/aiFloat64.template
+        args:
+          P:
+          R:
+          PORT:
+          OFFSET:
+          EGU:
+          HOPR:
+          LOPR:
+          PREC:
+          DATA_TYPE: FLOAT32_LE
+
+  - name: modbusIntReadout
+    description: |-
+      This will create int32 point records
+    parameters:
+      P:
+        type: str
+        description: Device Prefix
+      R:
+        type: str
+        description: Device Suffix
+      PORT:
+        type: str
+        description: Port name for the detector
+      DESC:
+        type: str
+        description: |-
+          Readout description
+        default: Value
+      OFFSET:
+        type: int
+        description: |-
+          OFFSET register address
+      EGU:
+        type: str
+        description: |-
+          Engineering Units
+        default: None
+      HOPR:
+        type: int
+        description: |-
+          High Limit
+        default: 0
+      LOPR:
+        type: int
+        description: |-
+          Low Limit
+        default: 0
+      PREC:
+        type: int
+        description: |-
+          Precision
+        default: 0
+      SCAN:
+        type: str
+        description: |-
+          Scan Mode
+        default: I/O Intr
+      EGUL:
+        type: float
+        description: |-
+          Engineering Units Low Limit
+        default: 0
+      EGUF:
+        type: float
+        description: |-
+          Engineering Units High Limit
+        default: 0
+    databases:
+      - file: $(SUPPORT)/modbus/db/ai.template
+        args:
+          P:
+          R:
+          PORT:
+          OFFSET:
+          EGU:
+          HOPR:
+          LOPR:
+          PREC:
+          BITS: '32'
+          EGUL:
+          EGUF:
+          SCAN:
+          MODBUS_DATA: INT32_LE

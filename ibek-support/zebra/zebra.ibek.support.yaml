@@ -1,0 +1,253 @@
+# yaml-language-server: $schema=https://github.com/epics-containers/ibek/releases/download/2.0.2/ibek.support.schema.json
+
+module: zebra
+
+entity_models:
+  - name: zebraLastDivDiff
+    description: |-
+      Makes a record pointing to DIV$(DIV) that will display the difference
+          between the last two DIV readings in position compare mode
+    parameters:
+      P:
+        type: str
+        description: |-
+          Device prefix
+
+      Q:
+        type: str
+        description: |-
+          Device suffix
+
+      DIV:
+        type: str
+        description: |-
+          DIV number
+
+      name:
+        type: id
+        description: |-
+          Object and gui association name
+
+    databases:
+      - file: $(ZEBRA)/db/zebraLastDivDiff.template
+        args:
+          Q:
+          P:
+          DIV:
+          name:
+
+  - name: zebra
+    description: |-
+      Controls the zebra signal converter box
+    parameters:
+      P:
+        type: str
+        description: |-
+          Device prefix
+
+      PORT:
+        type: id
+        description: |-
+          Driver port name
+
+      Q:
+        type: str
+        description: |-
+          Device suffix
+
+      serialPort:
+        type: object
+        description: |-
+          Serial port name
+
+      TIMEOUT:
+        type: str
+        description: |-
+          Timeout
+        default: '1'
+
+      ADDR:
+        type: str
+        description: |-
+          Asyn Port address
+        default: '0'
+
+      SCANRATE:
+        type: enum
+        description: |-
+          Specified scan rate for cpu intensive PVs
+        default: I/O Intr
+        values:
+          .1 second:
+          1 second:
+          10 second:
+          5 second:
+          Passive:
+          2 second:
+          .2 second:
+          .5 second:
+          Event:
+          I/O Intr:
+      NELM:
+        type: int
+        description: |-
+          Number of elements in position capture arrays
+        default: 100000
+
+      PREC:
+        type: str
+        description: |-
+          Precision to show position compare gate and pulse fields
+        default: '4'
+
+      M1:
+        type: str
+        description: |-
+          Motor 1 PV
+        default: $(P)$(Q):NOMOTOR
+
+      M1DIR:
+        type: str
+        description: |-
+          Set to - if motor inverted in geobrick (decode control = 3 instead of 7)
+        default: +
+
+      M1MULT:
+        type: str
+        description: |-
+          Multiplier to account for DT scaling. E.g. if *4 encoder decode, set to 0.25
+        default: '1'
+
+      M1HOMESETTLE:
+        type: str
+        description: |-
+          Time to wait after an autohome before setting zebra pos to readback pos
+        default: '5'
+
+      M2:
+        type: str
+        description: |-
+          Motor 2 PV
+        default: $(P)$(Q):NOMOTOR
+
+      M2DIR:
+        type: str
+        description: |-
+          Set to - if motor inverted in geobrick (decode control = 3 instead of 7)
+        default: +
+
+      M2MULT:
+        type: str
+        description: |-
+          Multiplier to account for DT scaling. E.g. if *4 encoder decode, set to 0.25
+        default: '1'
+
+      M2HOMESETTLE:
+        type: str
+        description: |-
+          Time to wait after an autohome before setting zebra pos to readback pos
+        default: '5'
+
+      M3:
+        type: str
+        description: |-
+          Motor 3 PV
+        default: $(P)$(Q):NOMOTOR
+
+      M3DIR:
+        type: str
+        description: |-
+          Set to - if motor inverted in geobrick (decode control = 3 instead of 7)
+        default: +
+
+      M3MULT:
+        type: str
+        description: |-
+          Multiplier to account for DT scaling. E.g. if *4 encoder decode, set to 0.25
+        default: '1'
+
+      M3HOMESETTLE:
+        type: str
+        description: |-
+          Time to wait after an autohome before setting zebra pos to readback pos
+        default: '5'
+
+      M4:
+        type: str
+        description: |-
+          Motor 4 PV
+        default: $(P)$(Q):NOMOTOR
+
+      M4DIR:
+        type: str
+        description: |-
+          Set to - if motor inverted in geobrick (decode control = 3 instead of 7)
+        default: +
+
+      M4MULT:
+        type: str
+        description: |-
+          Multiplier to account for DT scaling. E.g. if *4 encoder decode, set to 0.25
+        default: '1'
+
+      M4HOMESETTLE:
+        type: str
+        description: |-
+          Time to wait after an autohome before setting zebra pos to readback pos
+        default: '5'
+
+      MAXBUF:
+        type: int
+        description: |-
+          Maximum number of buffers (areaDetector)
+        default: 5
+
+      MAXMEM:
+        type: int
+        description: |-
+          Maximum memory (areaDetector)
+
+      R:
+        type: str
+        description: |-
+          Device Suffix
+
+      EMPTY:
+        type: str
+        description: |-
+          Empty macro to satisfy VDCT
+
+    pre_init:
+      - value: |
+          #zebraConfig(Port, SerialPort, MaxPosCompPoints, MaxBuffers, MaxMemory)
+          zebraConfig("{{PORT}}", "{{serialPort}}", {{NELM}}, {{MAXBUF}}, {{MAXMEM}})
+    databases:
+      - file: $(ZEBRA)/db/zebra.template
+        args:
+          M3:
+          M1DIR:
+          M3HOMESETTLE:
+          NELM:
+          M4MULT:
+          M4:
+          M1:
+          TIMEOUT:
+          M2:
+          PORT:
+          EMPTY:
+          SCANRATE:
+          M2HOMESETTLE:
+          M3MULT:
+          M4HOMESETTLE:
+          Q:
+          P:
+          R:
+          M1HOMESETTLE:
+          M2MULT:
+          ADDR:
+          M4DIR:
+          PREC:
+          M3DIR:
+          M1MULT:
+          M2DIR:
+
