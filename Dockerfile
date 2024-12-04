@@ -55,4 +55,7 @@ COPY --from=runtime_prep /assets /
 # install runtime system dependencies, collected from install.sh scripts
 RUN ibek support apt-install-runtime-packages --skip-non-native
 
+# insert basic example configuration for quick tests
+COPY tests/config /epics/ioc/config
+
 CMD ["bash", "-c", "${IOC}/start.sh"]
