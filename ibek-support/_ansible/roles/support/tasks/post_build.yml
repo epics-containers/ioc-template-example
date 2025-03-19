@@ -1,0 +1,75 @@
+- name: Post Build block
+  tags: [post_build]
+  block:
+    # Generating files in /epics/support/configure #############################
+
+    # RELEASE.shell is used to set up the environment with paths to the modules
+    - name: Add this module to the RELEASE.shell file for {{ module }}
+      ansible.builtin.lineinfile:
+        path: "{{ release_shell_file }}"
+        line: 'export {{ macro }}="{{ local_path }}"'
+        regexp: "export *{{ macro }} *=.*$"
+        mode: "0644"
+        create: true
+
+    - name: Get db folders for {{ module }}
+      ansible.builtin.shell: ls -d {{ support_folder }}/*/db
+      register: db_folders
+      changed_when: false
+
+    - name: Add EPICS_DB_INCLUDE_PATH to RELEASE.shell file for {{ module }}
+      ansible.builtin.lineinfile:
+        path: "{{ release_shell_file }}"
+        mode: "0644"
+        line: export EPICS_DB_INCLUDE_PATH="{{ db_folders.stdout_lines | join(':') }}"
+        regexp: "export *EPICS_DB_INCLUDE_PATH.*$"
+      when: db_folders.stdout_lines | length > 0
+
+    # the lib and dbd files are used to track what the IOC build needs to link against
+    - name: Add this module to the libs_list file - {{ module }}
+      ansible.builtin.lineinfile:
+        path: "{{ libs_list }}"
+        line: "{{ item }}"
+        regexp: "^{{ item }}$"
+        create: true
+        mode: "0644"
+      loop: "{{ libs }}"
+
+    - name: Add this module to the dbds_list file - {{ module }}
+      ansible.builtin.lineinfile:
+        path: "{{ dbds_list }}"
+        line: "{{ item }}"
+        regexp: "^{{ item }}$"
+        create: true
+        mode: "0644"
+      loop: "{{ dbds }}"
+
+    - name: Add this module to the dbds_list file - {{ module }}
+      ansible.builtin.lineinfile:
+        path: "{{ runtime_files_file }}"
+        line: "{{ item }}"
+        regexp: "^{{ item }}$"
+        create: true
+        mode: "0644"
+      loop: "{{ runtime_files }}"
+
+    # Patching #################################################################
+
+    # ad hoc patching of individual lines
+    - name: Patch lines for {{ module }}
+      ansible.builtin.lineinfile:
+        path: "{{ local_path }}/{{ item.path }}"
+        line: "{{ item.line }}"
+        regexp: "{{ item.regexp }}"
+        create: true
+        mode: "0644"
+      loop: "{{ patch_lines }}"
+      when: item.when | default(true) and (item.post_build | default(false) | bool)
+
+    - name: Call prebuild ad hoc scripts for {{ module }}
+      ansible.builtin.command: "bash {{ ibek_support_folder }}/{{ item.path }}"
+      args:
+        chdir: "{{ local_path }}"
+      loop: "{{ scripts }}"
+      when: (item.post_build | default(false)) | bool
+      changed_when: true
