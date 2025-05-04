@@ -1,11 +1,10 @@
 - name: Build block
-  tags: [build]
+  tags: [do_build]
   block:
     - name: Clean module for rebuild - {{ module }}
       ansible.builtin.command: make clean
       args:
         chdir: "{{ local_path }}"
-      when: force_build
       changed_when: true
 
     - name: Build module {{ module }}
@@ -41,3 +40,5 @@
       register: build
       ignore_errors: true
       changed_when: true
+      when:
+        - not skip_clean
