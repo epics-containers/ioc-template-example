@@ -67,6 +67,16 @@ comment_out: []
 #     post_build: true    # defaults to false
 patch_lines: []
 
+# files to patch with blocks of text e.g.
+# patch_blocks:
+#   - path: "{{ config_linux_host }}"
+#     marker: "# {mark} set all libraries to external ---------------------------"
+#     block: |
+#       AREA_DETECTOR=$(SUPPORT)
+#       CROSS_COMPILER_TARGET_ARCHS =
+#       ...
+patch_blocks: []
+
 # apply a patch file to the repository before compilation
 patch_file:
   path:     # path to the patch file
@@ -97,3 +107,7 @@ skip_clean: false
 # useful for debugging a build as it speeds up second builds massively
 # use `ansible.sh all -e skip_apt=true` to skip all the apt installs
 skip_apt: false
+
+# List of files to remove before the build
+# Can be useful where the repo includes configure/*.local files (which is should not!)
+remove_files_prebuild: []

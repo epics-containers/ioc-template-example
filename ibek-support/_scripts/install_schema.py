@@ -3,6 +3,7 @@
 A Pydantic model for the support install variables. Describes the variables
 that can be supplied to the ansible role support described in
 
+Execute this python script to generate a new schema file.
 """
 
 import json
@@ -11,14 +12,15 @@ from typing import Sequence
 
 from pydantic import BaseModel, ConfigDict, Field
 
+
 class StrictModel(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
         use_enum_values=True,
     )
 
-class SupportVariables(StrictModel):
 
+class SupportVariables(StrictModel):
     # nested classes ##########################################################
 
     class DownloadExtras(StrictModel):
@@ -34,6 +36,14 @@ class SupportVariables(StrictModel):
         path: str
         regexp: str
         line: str
+        when: str = Field(default="")
+        post_build: bool = Field(default=False)
+
+    class PatchBlocks(StrictModel):
+        path: str
+        block: str
+        insertafter: str = Field(default="EOF")
+        marker: str = Field(default="# {mark} ANSIBLE MANAGED BLOCK")
         when: str = Field(default="")
         post_build: bool = Field(default=False)
 
@@ -134,6 +144,11 @@ class SupportVariables(StrictModel):
         "Filepaths are relative to the root of the repository local path",
         default=(),
     )
+    patch_blocks: Sequence[PatchBlocks] = Field(
+        description="List of files to patch blocks of text into. "
+        "Used to add extra flags to Makefiles, CONFIG_SITE etc.",
+        default=(),
+    )
     patch_lines: Sequence[PatchLines] = Field(
         description="List of files to patch lines in. "
         "Used to add extra flags to Makefiles, CONFIG_SITE etc.",
@@ -152,6 +167,10 @@ class SupportVariables(StrictModel):
     tasks: Sequence[Task] = Field(
         description="List of ad hoc ansible tasks to execute. "
         "Paths are relative to the the ibek-support/module",
+        default=(),
+    )
+    remove_files_prebuild: Sequence[str] = Field(
+        description="A list project relative files to remove pre build.",
         default=(),
     )
 

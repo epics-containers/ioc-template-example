@@ -3,27 +3,22 @@
 module: positioner
 
 entity_models:
-
   - name: motorpositioner
     description: |-
       Template for wrapping a motor as a positioner. This allows it to be controlled by a multipositioner, mapping a list of names onto a list of motor positions
     parameters:
-      P:
-        type: str
-        description: |-
-          Device prefix, must match P of multipositioner
       Q:
         type: str
         description: |-
           Device suffix
-      pos:
-        type: str
-        description: |-
-          Multipositioner object      
       MP:
-        type: str
+        type: object
         description: |-
-          Multipositioner suffix, must match MP of multipositioner
+          Parent multipositioner object
+      motor:
+        type: object
+        description: |-
+          Motor record pv
       DESC:
         type: str
         description: |-
@@ -32,14 +27,11 @@ entity_models:
         type: str
         description: |-
           Engineering units
+        default: ""
       PREC:
         type: int
         description: |-
           Precision to display to
-      motor:
-        type: str
-        description: |-
-          Motor record pv
       VALA:
         type: float
         description: |-
@@ -120,12 +112,19 @@ entity_models:
         description: |-
           Positioner value for position 16
         default: 0
+      name:
+        type: str
+        description: |-
+          Name of the positioner
 
     databases:
-
       - file: $(POSITIONER)/db/motorpositioner.template
         args:
           .*:
+          P: "{{MP.P}}"
+          MP: "{{MP.MP}}"
+          EGU: "{{motor.EGU}}"
+          motor: "{{motor.M | default(motor.Q) }}"
 
   - name: multipositioner
     description: |-
@@ -151,82 +150,82 @@ entity_models:
         type: str
         description: |-
           String description for position 1
-        default: ''
+        default: ""
       STRB:
         type: str
         description: |-
           String description for position 2
-        default: ''
+        default: ""
       STRC:
         type: str
         description: |-
           String description for position 3
-        default: ''
+        default: ""
       STRD:
         type: str
         description: |-
           String description for position 4
-        default: ''
+        default: ""
       STRE:
         type: str
         description: |-
           String description for position 5
-        default: ''
+        default: ""
       STRF:
         type: str
         description: |-
           String description for position 6
-        default: ''
+        default: ""
       STRG:
         type: str
         description: |-
           String description for position 7
-        default: ''
+        default: ""
       STRH:
         type: str
         description: |-
           String description for position 8
-        default: ''
+        default: ""
       STRI:
         type: str
         description: |-
           String description for position 9
-        default: ''
+        default: ""
       STRJ:
         type: str
         description: |-
           String description for position 10
-        default: ''
+        default: ""
       STRK:
         type: str
         description: |-
           String description for position 11
-        default: ''
+        default: ""
       STRL:
         type: str
         description: |-
           String description for position 12
-        default: ''
+        default: ""
       STRM:
         type: str
         description: |-
           String description for position 13
-        default: ''
+        default: ""
       STRN:
         type: str
         description: |-
           String description for position 14
-        default: ''
+        default: ""
       STRO:
         type: str
         description: |-
           String description for position 15
-        default: ''
+        default: ""
       STRP:
         type: str
         description: |-
           String description for position 16
-        default: ''
+        default: ""
 
       P1_VALS:
         type: str
@@ -259,10 +258,7 @@ entity_models:
           This associates an edm screen with the template
         default: P6 Val
 
-
-
     databases:
-
       - file: $(POSITIONER)/db/multipositioner.template
         args:
           .*:
@@ -291,8 +287,9 @@ entity_models:
         type: str
         description: |-
           Engineering units
+        default: ""
       PREC:
-        type: str
+        type: int
         description: |-
           Precision to display to
       READBACK:
@@ -307,6 +304,7 @@ entity_models:
         type: str
         description: |-
           In position if abs(demand - readback) < DEADBAND
+          May be a CA link to a record or a constant
       STOPVAL:
         type: int
         description: |-
@@ -392,14 +390,17 @@ entity_models:
         description: |-
           Positioner value for position 16
         default: 0
+      name:
+        type: str
+        description: |-
+          Name of the positioner
 
     databases:
-
       - file: $(POSITIONER)/db/positioner.template
         args:
-          P:
+          P: "{{MP.P}}"
           Q:
-          MP:
+          MP: "{{MP.MP}}"
           DESC:
           SET:
           EGU:
@@ -424,4 +425,3 @@ entity_models:
           VALN:
           VALO:
           VALP:
-          pos:
