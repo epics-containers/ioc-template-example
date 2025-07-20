@@ -1,4 +1,0 @@
-# This file contains ignores rule violations for ansible-lint
-_ansible role-name
-_ansible/roles/ioc/vars/main.yml var-naming[no-role-prefix]
-_ansible/roles/support/vars/main.yml var-naming[no-role-prefix]
