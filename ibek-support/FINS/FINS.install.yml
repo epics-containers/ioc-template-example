@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=../_scripts/support_install_variables.json
+
+module: FINS
+version: rtems-epics-7
+dbds:
+  - FINS.dbd
+libs:
+  - FINS
+
+organization: https://github.com/DiamondLightSource
+
+comment_out:
+  - path: FINSApp/Makefile
+    regexp: opi
+
+patch_lines:
+  - path: "{{ config_linux_host }}"
+    regexp: CROSS_COMPILER_TARGET_ARCHS
+    line: CROSS_COMPILER_TARGET_ARCHS=
+    when: "{{ is_linux }}"

@@ -1,0 +1,16 @@
+label: NDAttribute
+parent: NDPluginBase
+children:
+
+- type: Group
+  name: NDCircularBuff
+  layout:
+    type: Grid
+    labelled: true
+  children:
+
+  - type: SignalW
+    name: Reset
+    write_pv: $(P)$(R)Reset
+    write_widget:
+      type: ToggleButton

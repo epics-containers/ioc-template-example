@@ -1,0 +1,42 @@
+# get all system dependencies
+
+- name: System block
+  tags: [system]
+  when: not skip_apt
+  block:
+    - name: Download additional files for {{ module }}
+      ansible.builtin.get_url:
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
+        mode: "0644"
+      loop: "{{ download_extras }}"
+
+    - name: Install system dependencies from registries {{ module }}
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ apt_developer }}"
+      when:
+        - not item.startswith('/')
+        - is_linux
+
+    - name: Install local system dependencies {{ module }}
+      ansible.builtin.package:
+        deb: "{{ item }}"
+        state: present
+      loop: "{{ apt_developer }}"
+      ignore_errors: true # local packages may already be installed
+      when:
+        - item.startswith('/')
+        - is_linux
+
+    - name: Register system dependencies for the runtime stage {{ module }}
+      ansible.builtin.lineinfile:
+        path: "{{ configure_folder }}/runtime_debs"
+        # note \Q...\E is used to escape the string
+        regexp: "^{{ item | regex_escape() }}$"
+        line: "{{ item }}"
+        create: true
+        mode: "0644"
+      loop: "{{ apt_runtime }}"
+      when: is_linux

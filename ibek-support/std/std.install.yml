@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=../_scripts/support_install_variables.json
+
+module: std
+version: R3-6-4
+# organization: https://github.com/epics-modules
+
+dbds:
+  - stdSupport.dbd
+
+libs:
+  - std
+
+comment_out:
+  - path: stdApp/Makefile
+    regexp: wildcard \*op\*

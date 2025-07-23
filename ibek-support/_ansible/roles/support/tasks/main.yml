@@ -1,0 +1,41 @@
+# A role to build a single support module in epics-containers
+
+- name: System Installs for {{ module }}
+  ansible.builtin.include_tasks: system.yml
+  tags: [system]
+
+- name: Clone {{ module }}
+  ansible.builtin.include_tasks: clone.yml
+  tags: [clone]
+
+- name: Pre Build Tasks for {{ module }}
+  ansible.builtin.include_tasks: tasks.yml
+  tags: [pre_build_tasks]
+  vars:
+    is_post_build: false
+
+- name: Pre Build for {{ module }}
+  ansible.builtin.include_tasks: pre_build.yml
+  tags: [pre_build]
+
+- name: Fixup Configure/RELEASE for {{ module }}
+  ansible.builtin.include_tasks: release.yml
+  tags: [release]
+
+- name: Build for {{ module }}
+  ansible.builtin.include_tasks: build.yml
+  tags: [do_build]
+
+- name: Post Build for {{ module }}
+  ansible.builtin.include_tasks: post_build.yml
+  tags: [post_build]
+
+- name: Post Build Tasks for {{ module }}
+  ansible.builtin.include_tasks: tasks.yml
+  tags: [post_build_tasks]
+  vars:
+    is_post_build: true
+
+- name: Runtime setup for {{ module }}
+  ansible.builtin.include_tasks: runtime.yml
+  tags: [runtime]

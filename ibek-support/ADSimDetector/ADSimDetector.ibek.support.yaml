@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://github.com/epics-containers/ibek/releases/download/3.0.1/ibek.support.schema.json
+
+module: ADSimDetector
+
+entity_models:
+  - name: simDetector
+    description: |-
+      Creates a simulation detector
+    parameters:
+      P:
+        type: str
+        description: Device Prefix
+      R:
+        type: str
+        description: Device Suffix
+      PORT:
+        type: id
+        description: Port name for the detector
+      TIMEOUT:
+        type: str
+        description: Timeout
+        default: "1"
+      ADDR:
+        type: str
+        default: "0"
+        description: Asyn Port address
+      WIDTH:
+        type: int
+        default: 1280
+        description: Image Width
+      HEIGHT:
+        type: int
+        default: 1024
+        description: Image Height
+      DATATYPE:
+        type: int
+        description: Datatype
+        default: 1
+      BUFFERS:
+        type: int
+        description: Maximum number of NDArray buffers to be created for plugin callbacks
+        default: 50
+      MEMORY:
+        type: int
+        description: Max memory to allocate, should be maxw*maxh*nbuffer for driver and all attached plugins
+        default: 0
+
+    pre_init:
+      - type: text
+        value: |
+          # simDetectorConfig(portName, maxSizeX, maxSizeY, dataType, maxBuffers, maxMemory)
+          simDetectorConfig("{{PORT}}", {{WIDTH}}, {{HEIGHT}}, {{DATATYPE}}, {{BUFFERS}}, {{MEMORY}})
+
+    databases:
+      - file: $(ADSIMDETECTOR)/db/simDetector.template
+        args:
+          P:
+          R:
+          PORT:
+          TIMEOUT:
+          ADDR:
+
+    pvi:
+      yaml_path: simDetector.pvi.device.yaml
+      ui_macros:
+        P:
+        R:
+      pv: true
+      pv_prefix: $(P)$(R)

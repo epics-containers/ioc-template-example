@@ -1,0 +1,17 @@
+label: NDStdArrays
+parent: NDPluginBase
+children:
+
+- type: Group
+  name: NDStdArraysMisc
+  label: NDStdArrays Ungrouped
+  layout:
+    type: Grid
+    labelled: true
+  children:
+
+  - type: SignalR
+    name: ArrayData
+    read_pv: $(P)$(R)ArrayData
+    read_widget:
+      type: TextRead
