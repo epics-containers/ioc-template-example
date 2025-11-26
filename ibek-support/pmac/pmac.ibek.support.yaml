@@ -1089,6 +1089,66 @@ entity_models:
           STATUSSV14:
           STATUSSV15:
 
+  - name: pmacSetCoordStepsPerUnit
+    description: |-
+      Apply an integer scale factor to an axis on the pmac.
+    parameters:
+      CS:
+        type: str
+        description: |-
+          Underlying CS object
+      AXIS:
+        type: int
+        description: |-
+          Axis number to apply scale to
+      SCALE:
+        type: int
+        description: |-
+          Scale factor the cts will be multiplied by before
+          being passed to the motor record.
+
+    pre_init:
+      - value: |
+          pmacSetCoordStepsPerUnit("{{CS}}", {{AXIS}}, {{SCALE}})
+
+  - name: pmacSetOpenLoopEncoderAxis
+    description: |-
+      Set a PMAC axis to open loop.
+    parameters:
+      CONTROLLER:
+        type: str
+        description: |-
+          Underlying PMAC or Geobrick object
+      AXIS:
+        type: int
+        description: |-
+          Motor axis number
+      ENCODER_AXIS:
+        type: int
+        description: |-
+          Encoder axis number
+
+    pre_init:
+      - value: |
+          pmacSetOpenLoopEncoderAxis("{{CONTROLLER}}", {{AXIS}}, {{ENCODER_AXIS}})
+
+  - name: pmacMonitorVariables
+    description: |-
+      Monitor PMAC variables
+    parameters:
+      CONTROLLER:
+        type: str
+        description: |-
+          Underlying PMAC or Geobrick object
+      VARIABLES:
+        type: str
+        description: |-
+          Space seperated list of pmac variables to monitor
+
+    pre_init:
+      - value: |
+          pmacMonitorVariables("{{CONTROLLER}}", "{{VARIABLES}}")
+
   - name: pmacVariableWrite
     description: |-
       Simple template that reads and writes to a variable on a
@@ -1126,16 +1186,31 @@ entity_models:
         default: 5
 
       DTYP:
-        type: str
+        type: enum
         description: |-
           asyn DTYP (e.g., asynFloat64, asynInt32)
         default: asynFloat64
+        values:
+          "asynInt32":
+          "asynInt64":
+          "asynFloat64":
 
       TYPE:
-        type: str
+        type: enum
         description: |-
           PMAC variable type (D=double, I=integer, H=hex, S=string)
         default: D
+        values:
+          "D":
+          "I":
+          "H":
+          "S":
+
+      LABEL:
+        type: str
+        description: |-
+          Label for GUI
+        default: ""
 
     databases:
       - file: pmacVariableWrite.template
@@ -1148,6 +1223,163 @@ entity_models:
           VAR:
           TYPE:
           PORT:
+          LABEL:
+
+  - name: pmacVariableRead
+    description: |-
+      Simple template that reads a variable on a
+      PMAC or geoBrick via dynamic parameters.
+    parameters:
+      P:
+        type: str
+        description: |-
+          Pv Prefix
+
+      Q:
+        type: str
+        description: |-
+          Pv Suffix
+
+      PORT:
+        type: object
+        description: |-
+          Delta tau motor controller comms port
+
+      VAR:
+        type: str
+        description: |-
+          Variable on PMAC to write to, e.g. P700
+
+      EGU:
+        type: str
+        description: |-
+          Engineering units
+
+      VARIABLE_PREC:
+        type: int
+        description: |-
+          Variable Record precision
+        default: 5
+
+      DTYP:
+        type: enum
+        description: |-
+          asyn DTYP (e.g., asynFloat64, asynInt32)
+        default: asynFloat64
+        values:
+          "asynInt32":
+          "asynInt64":
+          "asynFloat64":
+
+      TYPE:
+        type: enum
+        description: |-
+          PMAC variable type (D=double, I=integer, H=hex, S=string)
+        default: D
+        values:
+          "D":
+          "I":
+          "H":
+          "S":
+
+      SPEED:
+        type: enum
+        description: |-
+          Speed to read at (F=motor scan rates, M=medium (2 s), S=slow (5 s))
+        default: M
+        values:
+          "F":
+          "M":
+          "S":
+
+      LABEL:
+        type: str
+        description: |-
+          Label for GUI
+        default: ""
+
+    databases:
+      - file: pmacVariableRead.template
+        args:
+          P:
+          Q:
+          DTYP:
+          PORT:
+          TYPE:
+          SPEED:
+          VAR:
+          EGU:
+          VARIABLE_PREC:
+          LABEL:
+
+  - name: pmacVariableReadLED
+    description: |-
+      Simple template that reads an integer variable on a
+      PMAC or GeoBrick which can have a value of 1 or 0
+      and uses an LED widget.
+    parameters:
+      P:
+        type: str
+        description: |-
+          Pv Prefix
+
+      Q:
+        type: str
+        description: |-
+          Pv Suffix
+
+      PORT:
+        type: object
+        description: |-
+          Delta tau motor controller comms port
+
+      SPEED:
+        type: enum
+        description: |-
+          Speed to read at (F=motor scan rates, M=medium (2 s), S=slow (5 s))
+        default: M
+        values:
+          "F":
+          "M":
+          "S":
+
+      VAR:
+        type: str
+        description: |-
+          Variable on PMAC to write to, e.g. P700
+
+      ONAM:
+        type: str
+        description: |-
+          One name
+
+      ZNAM:
+        type: str
+        description: |-
+          Zero name
+
+      OSV:
+        type: str
+        description: |-
+          One severity
+
+      ZSV:
+        type: str
+        description: |-
+          Zero severity
+
+    databases:
+      - file: pmacVariableReadLED.template
+        args:
+          P:
+          Q:
+          PORT:
+          SPEED:
+          VAR:
+          ONAM:
+          ZNAM:
+          OSV:
+          ZSV:
 
   - name: pmacCreateCsGroup
     description: |-
@@ -1332,10 +1564,167 @@ entity_models:
         description: |-
           This associates an edm screen with the template
 
+      LABEL:
+        type: str
+        description: |-
+          Label for GUI
+        default: ""
+
     databases:
-      - file: $(PMAC)/db/accel_dcm.template
+      - file: accel_dcm.template
         args:
           P:
           PORT:
           COORD:
           name:
+
+  - name: EncoderReadback
+    description: |-
+      Read back encoder-only axes
+    parameters:
+      name:
+        type: str
+        description: |-
+          Command name
+
+      P:
+        type: str
+        description: |-
+          Device Prefix
+
+      Q:
+        type: str
+        description: |-
+          Device Suffix
+
+      PORT:
+        type: str
+        description: |-
+          Controller Port
+
+      AXIS:
+        type: int
+        description: |-
+          Axis number
+
+      DESC:
+        type: str
+        description: |-
+          Description
+
+      EGU:
+        type: str
+        description: |-
+          Engineering units
+
+      ERES:
+        type: float
+        description: |-
+          Encoder resolution
+
+      PREC:
+        type: int
+        description: |-
+          Readback precision
+
+      SCAN:
+        type: str
+        description: |-
+          Scan rate
+        default: "0.1 second"
+
+    databases:
+      - file: encoder_readback.template
+        args:
+          name:
+          P:
+          Q:
+          PORT:
+          AXIS:
+          DESC:
+          EGU:
+          ERES:
+          PREC:
+          SCAN:
+
+  - name: RunCommand
+    description: |-
+      Execute a custom command on the pmac
+    parameters:
+      name:
+        type: str
+        description: |-
+          Command name
+
+      P:
+        type: str
+        description: |-
+          Device Prefix
+
+      R:
+        type: str
+        description: |-
+          Device Suffix
+
+      PORT:
+        type: str
+        description: |-
+          Geobrick/PMAC name
+
+      COMMAND:
+        type: str
+        description: |-
+          Command to execute
+
+      DESC:
+        type: str
+        description: |-
+          Description, displayed on OPI screen
+
+    databases:
+      - file: run_command.template
+        args:
+          name:
+          P:
+          R:
+          PORT:
+          COMMAND:
+          DESC:
+
+  - name: RunPlc
+    description: |-
+      Execute a PLC on the pmac
+    parameters:
+      name:
+        type: str
+        description: |-
+          Command name
+
+      P:
+        type: str
+        description: |-
+          Device Prefix
+
+      PLC:
+        type: int
+        description: |-
+          PLC to execute
+
+      PORT:
+        type: str
+        description: |-
+          Geobrick/PMAC name
+
+      DESC:
+        type: str
+        description: |-
+          Description, displayed on OPI screen
+
+    databases:
+      - file: run_plc.template
+        args:
+          name:
+          P:
+          PLC:
+          PORT:
+          DESC:
