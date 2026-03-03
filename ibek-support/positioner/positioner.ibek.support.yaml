@@ -16,7 +16,7 @@ entity_models:
         description: |-
           Parent multipositioner object
       motor:
-        type: object
+        type: str
         description: |-
           Motor record pv
       DESC:
@@ -112,10 +112,6 @@ entity_models:
         description: |-
           Positioner value for position 16
         default: 0
-      name:
-        type: str
-        description: |-
-          Name of the positioner
 
     databases:
       - file: $(POSITIONER)/db/motorpositioner.template
@@ -123,8 +119,7 @@ entity_models:
           .*:
           P: "{{MP.P}}"
           MP: "{{MP.MP}}"
-          EGU: "{{motor.EGU}}"
-          motor: "{{motor.M | default(motor.Q) }}"
+          motor: "{{motor}}"
 
   - name: multipositioner
     description: |-
@@ -390,10 +385,6 @@ entity_models:
         description: |-
           Positioner value for position 16
         default: 0
-      name:
-        type: str
-        description: |-
-          Name of the positioner
 
     databases:
       - file: $(POSITIONER)/db/positioner.template
