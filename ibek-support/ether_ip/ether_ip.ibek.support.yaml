@@ -45,11 +45,6 @@ entity_models:
     description: |-
       This creates an IP connection to a plc using the ether_ip driver
     parameters:
-      name:
-        type: id
-        description: |-
-          Name
-
       device:
         type: str
         description: |-
@@ -75,9 +70,8 @@ entity_models:
       - value: |
           drvEtherIP_define_PLC("{{port}}", "{{ip}}", 0)
     databases:
-      - file: $(ETHER_IP)/db/ether_ip_plcInfo.template
+      - file: ether_ip_plcInfo.template
         args:
-          name:
           port:
           device:
 
