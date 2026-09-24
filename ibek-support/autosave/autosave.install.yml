@@ -1,8 +1,0 @@
-# yaml-language-server: $schema=../_scripts/support_install_variables.json
-
-module: autosave
-version: R6-0
-dbds:
-  - asSupport.dbd
-libs:
-  - autosave
