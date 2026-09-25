@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 4.7.0-8-g9dd4aa8
+_commit: 4.7.0-10-gfe94689
 _src_path: gh:epics-containers/ioc-template
 description: A test instantiation of the ioc-template copier template
 git_platform: github.com
